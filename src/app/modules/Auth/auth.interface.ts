@@ -11,7 +11,7 @@ export interface IRegister {
 
 // Login Interface
 export interface ILogin {
-  email: string;
+  id: string;
   password: string;
 }
 

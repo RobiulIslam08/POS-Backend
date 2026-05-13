@@ -67,7 +67,7 @@ const registerUser = async (payload: IRegister): Promise<IAuthResponse> => {
 // ==================== LOGIN ====================
 const loginUser = async (payload: ILogin): Promise<IAuthResponse> => {
   // Check if user exists
-  const user = await User.isUserExistsByEmail(payload.email);
+  const user = await User.isUserExitsByCustomId(payload.id);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
@@ -87,7 +87,7 @@ const loginUser = async (payload: ILogin): Promise<IAuthResponse> => {
   const isPasswordMatched = await user.comparePassword(payload.password);
 
   if (!isPasswordMatched) {
-    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid email or password');
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid ID or password');
   }
 
   // Create JWT payload (uses custom userId, not MongoDB _id)
