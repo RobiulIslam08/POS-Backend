@@ -44,6 +44,7 @@ export interface IUserDocument extends IUser, Document {
 export interface IUserModel extends Model<IUserDocument> {
   isUserExistsByEmail(email: string): Promise<IUserDocument | null>;
   isUserExitsByCustomId(userId: string): Promise<IUserDocument | null>;
+  isUserExistsByUsername(username: string): Promise<IUserDocument | null>;
   isPasswordMatched(
     plainTextPassword: string,
     hashedPassword: string,

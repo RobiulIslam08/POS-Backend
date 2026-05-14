@@ -30,7 +30,7 @@ const registerValidationSchema = z.object({
 // Login Validation Schema
 const loginValidationSchema = z.object({
   body: z.object({
-    id: z.string({ message: 'User ID is required' }),
+    username: z.string({ message: 'Username is required' }),
     password: z.string({ message: 'Password is required' }),
   }),
 });

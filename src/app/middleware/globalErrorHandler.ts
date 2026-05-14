@@ -8,6 +8,7 @@ import handleCastError from '../errors/handleCastError';
 import handleDuplicateError from '../errors/handleDuplicateError';
 import AppError from '../errors/AppError';
 import config from '../config';
+import httpStatus from 'http-status';
 
 const globalErrorHandler:ErrorRequestHandler = (
   err,
@@ -55,17 +56,23 @@ const globalErrorHandler:ErrorRequestHandler = (
       }
     ]
     statusCode = err?.statusCode
-  }else if(err instanceof Error){  // aita sobar niche rakhte hobe . karon aita root err message
-   
+  } else if (err?.name === 'JsonWebTokenError') {
+    statusCode = httpStatus.UNAUTHORIZED;
+    message = 'Invalid token';
+    errorSources = [{ path: '', message: 'Invalid token' }];
+  } else if (err?.name === 'TokenExpiredError') {
+    statusCode = httpStatus.UNAUTHORIZED;
+    message = 'Token expired';
+    errorSources = [{ path: '', message: 'Token expired' }];
+  } else if (err instanceof Error) {
+    // aita sobar niche rakhte hobe . karon aita root err message
     message = err?.message;
     errorSources = [
       {
-        path:'',
-        message:err?.message
-      }
-    ]
-  
-    
+        path: '',
+        message: err?.message,
+      },
+    ];
   }
   res.status(statusCode).json({
     success: false,

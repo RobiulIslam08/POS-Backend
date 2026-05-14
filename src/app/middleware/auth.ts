@@ -9,30 +9,31 @@ import { User } from '../modules/User/user.model';
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    // BYPASS AUTH FOR TESTING
-    req.user = {
-      userId: 'admin',
-      role: 'admin',
-    };
-    return next();
-
-    // const token = req.headers.authorization;
+    const token = req.headers.authorization;
     // ... rest of the code commented out or ignored
 
-    // Check if token exists
-    if (!token) {
+    // Check if token exists and has Bearer prefix
+    if (!token || !token.startsWith('Bearer ')) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
+    const accessToken = token.split(' ')[1];
+
     // Verify token
     const decoded = jwt.verify(
-      token,
+      accessToken,
       config.jwt_access_secret as string,
     ) as JwtPayload;
 
     const { role, userId, iat } = decoded;
 
     // Check if user exists
+    // Special case for default admin who might not be in DB
+    if (userId === config.admin_username && role === 'admin') {
+      req.user = decoded as JwtPayload & { role: string };
+      return next();
+    }
+
     const user = await User.isUserExitsByCustomId(userId);
 
     if (!user) {

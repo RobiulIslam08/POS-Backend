@@ -66,8 +66,43 @@ const registerUser = async (payload: IRegister): Promise<IAuthResponse> => {
 
 // ==================== LOGIN ====================
 const loginUser = async (payload: ILogin): Promise<IAuthResponse> => {
-  // Check if user exists
-  const user = await User.isUserExitsByCustomId(payload.id);
+  // Check for default admin login bypass
+  if (
+    payload.username === config.admin_username &&
+    payload.password === config.admin_password
+  ) {
+    const jwtPayload = {
+      userId: config.admin_username as string,
+      role: 'admin',
+    };
+
+    const accessToken = createToken(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      config.jwt_access_expires_in as string,
+    );
+
+    const refreshToken = createToken(
+      jwtPayload,
+      config.jwt_refresh_secret as string,
+      config.jwt_refresh_expires_in as string,
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        _id: '000000000000000000000000', // Pseudo ID for default admin
+        userId: config.admin_username as string,
+        fullName: 'Default Admin',
+        email: 'admin@system.com',
+        role: 'admin',
+      },
+    };
+  }
+
+  // Check if user exists in database (search by username)
+  const user = await User.isUserExistsByUsername(payload.username);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
@@ -87,7 +122,7 @@ const loginUser = async (payload: ILogin): Promise<IAuthResponse> => {
   const isPasswordMatched = await user.comparePassword(payload.password);
 
   if (!isPasswordMatched) {
-    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid ID or password');
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid username or password');
   }
 
   // Create JWT payload (uses custom userId, not MongoDB _id)

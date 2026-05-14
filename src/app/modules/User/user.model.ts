@@ -146,6 +146,13 @@ userSchema.statics.isUserExitsByCustomId = async function (
   return await this.findOne({ userId }).select('+password');
 };
 
+// Static: Find by username (with password)
+userSchema.statics.isUserExistsByUsername = async function (
+  username: string,
+): Promise<IUserDocument | null> {
+  return await this.findOne({ username }).select('+password');
+};
+
 // Static: Compare passwords
 userSchema.statics.isPasswordMatched = async function (
   plainTextPassword: string,

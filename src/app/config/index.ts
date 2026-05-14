@@ -15,4 +15,6 @@ export default {
   jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
   reset_pass_ui_link: process.env.RESET_PASS_UI_LINK,
   frontend_url: process.env.FRONTEND_URL || 'http://localhost:5173',
+  admin_username: process.env.ADMIN_USERNAME || 'admin',
+  admin_password: process.env.ADMIN_PASSWORD || 'admin',
 };
