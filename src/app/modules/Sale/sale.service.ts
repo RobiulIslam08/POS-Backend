@@ -49,19 +49,36 @@ const createSale = async (payload: ISale, userId: string) => {
   }
 };
 
-// Get all sales (with date range, user filter)
+// Get all sales
 const getAllSales = async (query: Record<string, unknown>) => {
-  const saleQuery = new QueryBuilder(Sale.find(), query)
+  // Handle type (SALE or RETURN)
+  if (query.type === 'RETURN') {
+    query.isReturn = true;
+  } else {
+    // If not explicitly RETURN, treat as SALE (which has isReturn false or undefined)
+    query.isReturn = { $ne: true };
+  }
+  delete query.type;
+
+  const saleQuery = new QueryBuilder(
+    Sale.find().populate('customer'),
+    query
+  )
     .search(saleSearchableFields)
     .filter()
     .sort()
     .paginate()
     .fields();
 
-  const result = await saleQuery.modelQuery.populate('customer');
+  const result = await saleQuery.modelQuery;
   const meta = await saleQuery.countTotal();
-  return { meta, data: result };
+
+  return {
+    meta,
+    data: result,
+  };
 };
+
 
 // Get single sale by bill number
 const getSaleByBillNo = async (billNo: number) => {

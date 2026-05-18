@@ -3,11 +3,17 @@ import { z } from 'zod';
 const updateSettingsValidationSchema = z.object({
   body: z.object({
     storeName: z.string().trim().optional(),
+    vatNumber: z.string().trim().optional(),
+    invoicePrefix: z.string().trim().optional(),
+    defaultPayment: z.string().trim().optional(),
+    timezone: z.string().trim().optional(),
+    supportContact: z.string().trim().optional(),
+    lowStockAlert: z.number().optional(),
+    allowNegativeStock: z.enum(['yes', 'no']).optional(),
     currency: z.string().trim().optional(),
     currencySymbol: z.string().trim().optional(),
     vatPercent: z.number().min(0).max(100).optional(),
     defaultLanguage: z.enum(['en', 'ar']).optional(),
-    defaultPaymentMode: z.string().trim().optional(),
     dateLocale: z.string().trim().optional(),
     timeLocale: z.string().trim().optional(),
     receiptHeader: z.string().trim().optional(),

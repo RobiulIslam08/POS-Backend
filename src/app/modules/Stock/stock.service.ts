@@ -10,9 +10,33 @@ const stockSearchableFields = ['productName', 'productCode', 'storage'];
 
 // Get all stock (products with stock info)
 const getStock = async (query: Record<string, unknown>) => {
+  const queryObj = { ...query };
+
+  // Map warehouse to storage
+  if (queryObj.warehouse) {
+    queryObj.storage = queryObj.warehouse;
+    delete queryObj.warehouse;
+  }
+
+  // Map date filters to updatedAt
+  if (queryObj.fromDate || queryObj.toDate) {
+    const dateFilter: Record<string, unknown> = {};
+    if (queryObj.fromDate) {
+      dateFilter['$gte'] = new Date(queryObj.fromDate as string);
+      delete queryObj.fromDate;
+    }
+    if (queryObj.toDate) {
+      dateFilter['$lte'] = new Date(queryObj.toDate as string);
+      delete queryObj.toDate;
+    }
+    if (Object.keys(dateFilter).length > 0) {
+      queryObj.updatedAt = dateFilter;
+    }
+  }
+
   const stockQuery = new QueryBuilder(
-    Product.find({}, 'productCode productName quantity storage minQty'),
-    query,
+    Product.find({}, 'productCode productName quantity storage minQty updatedAt'),
+    queryObj,
   )
     .search(stockSearchableFields)
     .filter()
