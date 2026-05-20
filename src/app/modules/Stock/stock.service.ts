@@ -6,45 +6,48 @@ import { IStockReturn, IStockCorrection } from './stock.interface';
 import AppError from '../../errors/AppError';
 import QueryBuilder from '../../utils/QueryBuilder';
 
-const stockSearchableFields = ['productName', 'productCode', 'storage'];
+
 
 // Get all stock (products with stock info)
 const getStock = async (query: Record<string, unknown>) => {
-  const queryObj = { ...query };
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 50;
+  const skip = (page - 1) * limit;
 
-  // Map warehouse to storage
-  if (queryObj.warehouse) {
-    queryObj.storage = queryObj.warehouse;
-    delete queryObj.warehouse;
+  // Build filter object
+  const filter: Record<string, unknown> = { isDeleted: { $ne: true } };
+
+  // Keyword search
+  if (query.searchTerm) {
+    const regex = new RegExp(query.searchTerm as string, 'i');
+    filter.$or = [
+      { productName: regex },
+      { productCode: regex },
+      { storage: regex },
+    ] as any;
   }
 
-  // Map date filters to updatedAt
-  if (queryObj.fromDate || queryObj.toDate) {
+  // Map warehouse -> storage filter
+  if (query.warehouse) {
+    filter.storage = query.warehouse;
+  }
+
+  // Date range filter on updatedAt
+  if (query.fromDate || query.toDate) {
     const dateFilter: Record<string, unknown> = {};
-    if (queryObj.fromDate) {
-      dateFilter['$gte'] = new Date(queryObj.fromDate as string);
-      delete queryObj.fromDate;
-    }
-    if (queryObj.toDate) {
-      dateFilter['$lte'] = new Date(queryObj.toDate as string);
-      delete queryObj.toDate;
-    }
-    if (Object.keys(dateFilter).length > 0) {
-      queryObj.updatedAt = dateFilter;
-    }
+    if (query.fromDate) dateFilter['$gte'] = new Date(query.fromDate as string);
+    if (query.toDate) dateFilter['$lte'] = new Date(query.toDate as string);
+    if (Object.keys(dateFilter).length > 0) filter.updatedAt = dateFilter;
   }
 
-  const stockQuery = new QueryBuilder(
-    Product.find({}, 'productCode productName quantity storage minQty updatedAt'),
-    queryObj,
-  )
-    .search(stockSearchableFields)
-    .filter()
-    .sort()
-    .paginate();
+  const projection = 'productCode productName arabicName batchCode quantity storage minQty expiryDate updatedAt';
 
-  const result = await stockQuery.modelQuery;
-  const meta = await stockQuery.countTotal();
+  const [result, total] = await Promise.all([
+    Product.find(filter as any, projection).sort('-createdAt').skip(skip).limit(limit),
+    Product.countDocuments(filter as any),
+  ]);
+
+  const meta = { page, limit, total, totalPage: Math.ceil(total / limit) };
   return { meta, data: result };
 };
 
@@ -90,6 +93,9 @@ const processCorrection = async (payload: IStockCorrection, userId: string) => {
       const product = await Product.findOne({ productCode: item.code }).session(session);
       if (product) {
         product.quantity = item.quantity; // Set to corrected quantity
+        // Also update batch and expiry from the correction item if provided
+        if (item.batchCode) product.batchCode = item.batchCode;
+        if (item.expiryDate) product.expiryDate = new Date(item.expiryDate as unknown as string);
         await product.save({ session });
       }
     }

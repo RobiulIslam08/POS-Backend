@@ -23,6 +23,8 @@ const createProductValidationSchema = z.object({
     productType: z.enum(['SINGLE', 'BOX']).default('SINGLE'),
     boxQty: z.number().min(1).default(1),
     formulation: z.string().trim().optional(),
+    batchCode: z.string().trim().optional(),
+    expiryDate: z.string().optional().or(z.date().optional()),
   }),
 });
 
@@ -44,6 +46,8 @@ const updateProductValidationSchema = z.object({
     productType: z.enum(['SINGLE', 'BOX']).optional(),
     boxQty: z.number().min(1).optional(),
     formulation: z.string().trim().optional(),
+    batchCode: z.string().trim().optional(),
+    expiryDate: z.string().optional().or(z.date().optional()),
   }),
 });
 

@@ -62,6 +62,7 @@ const productSchema = new Schema<IProduct>(
       type: String,
       trim: true,
     },
+    
     minQty: {
       type: Number,
       default: 1,
@@ -81,6 +82,8 @@ const productSchema = new Schema<IProduct>(
       type: String,
       trim: true,
     },
+    batchCode: { type: String, trim: true, default: null },
+    expiryDate: { type: Date, default: null },
     isDeleted: {
       type: Boolean,
       default: false,

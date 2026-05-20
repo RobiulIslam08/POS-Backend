@@ -15,6 +15,8 @@ export interface IProduct {
   boxQty: number;
   formulation?: string;
   isDeleted: boolean;
+  batchCode?: string;
+  expiryDate?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
