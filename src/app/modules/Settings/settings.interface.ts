@@ -15,6 +15,8 @@ export interface ISettings {
   timeLocale: string;
   receiptHeader?: string;
   receiptFooter?: string;
+  storeAddress?: string;
+  crNumber?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -8,7 +8,7 @@ const updateSettingsValidationSchema = z.object({
     defaultPayment: z.string().trim().optional(),
     timezone: z.string().trim().optional(),
     supportContact: z.string().trim().optional(),
-    lowStockAlert: z.number().optional(),
+    lowStockAlert: z.preprocess((val) => (val === '' || val === undefined || val === null ? undefined : Number(val)), z.number().optional()),
     allowNegativeStock: z.enum(['yes', 'no']).optional(),
     currency: z.string().trim().optional(),
     currencySymbol: z.string().trim().optional(),
@@ -18,6 +18,8 @@ const updateSettingsValidationSchema = z.object({
     timeLocale: z.string().trim().optional(),
     receiptHeader: z.string().trim().optional(),
     receiptFooter: z.string().trim().optional(),
+    storeAddress: z.string().trim().optional(),
+    crNumber: z.string().trim().optional(),
   }),
 });
 

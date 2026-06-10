@@ -19,6 +19,8 @@ const settingsSchema = new Schema<ISettings>(
     timeLocale: { type: String, default: 'en-SA', trim: true },
     receiptHeader: { type: String, trim: true },
     receiptFooter: { type: String, trim: true },
+    storeAddress: { type: String, default: '', trim: true },
+    crNumber: { type: String, default: '', trim: true },
   },
   {
     timestamps: true,
