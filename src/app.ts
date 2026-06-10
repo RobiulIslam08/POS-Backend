@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [config.frontend_url as string, 'http://localhost:3000','http://localhost:6100'],
+    origin: true,
     credentials: true,
   }),
 );
